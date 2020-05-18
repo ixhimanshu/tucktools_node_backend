@@ -15,38 +15,9 @@ route.get('/api/movies', (req,res) => {
     res.send(movies);
 })
 route.get('/api/movies/:id', (req,res) =>{
-    // let movie = movies.find(c => c.id === parseInt(req.params.id) )
-    // if(!movie) res.send(`No movie found for the Id : ${req.params.id}`);
-    // res.send(movie);
-    doScreenCapture(`https://www.${req.params.id}`, 'capture')
-    async function doScreenCapture(url2, site_name) {
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
-      await page.goto(url2, {
-          waitUntil: 'domcontentloaded'
-      });
-      await page.screenshot({
-          fullPage: true
-      }).then((result) => {
-          // console.log(`${result} got some results.`);
-          let img = result.toString('base64');
-          res.send({
-              status: 200,
-              dataSet: img
-          })
-          .catch(err => {
-              res.send({
-                  status: 400,
-                  dataSet: err
-              })
-          })
-          
-      }).catch(e => {
-          console.error(`[${site_name}] Error in snapshotting news`, e);
-          return false;
-      });
-      await browser.close();
-    }
+    let movie = movies.find(c => c.id === parseInt(req.params.id) )
+    if(!movie) res.send(`No movie found for the Id : ${req.params.id}`);
+    res.send(movie);
 })
 
 route.post('/api/movies', (req,res) => {
