@@ -19,6 +19,7 @@ route.get('/api/movies/:id', (req,res) =>{
     // if(!movie) res.send(`No movie found for the Id : ${req.params.id}`);
     // res.send(movie);
     doScreenCapture(`https://www.${req.params.id}`, 'capture')
+
     async function doScreenCapture(url2, site_name) {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
@@ -33,13 +34,6 @@ route.get('/api/movies/:id', (req,res) =>{
               status: 200,
               dataSet: img
           })
-          .catch(err => {
-              res.send({
-                  status: 400,
-                  dataSet: err
-              })
-          })
-          
       }).catch(e => {
           console.error(`[${site_name}] Error in snapshotting news`, e);
           return false;
