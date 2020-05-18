@@ -1,4 +1,6 @@
 const express = require('express');
+const puppeteer = require('puppeteer');
+
 const route = express.Router();
 
 const movies = [
@@ -76,6 +78,38 @@ route.delete('/api/movies/:id', (req,res) => {
     movies.splice(index,1);
 
     res.send(movie);
+})
+
+route.use('api/capture/:id', (req,res,next) => {
+    doScreenCapture(`https://www.${req.params.id}`, 'capture')
+  async function doScreenCapture(url2, site_name) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url2, {
+        waitUntil: 'domcontentloaded'
+    });
+    await page.screenshot({
+        fullPage: true
+    }).then((result) => {
+        // console.log(`${result} got some results.`);
+        let img = result.toString('base64');
+        res.send({
+            status: 200,
+            dataSet: img
+        })
+        .catch(err => {
+            res.send({
+                status: 400,
+                dataSet: err
+            })
+        })
+        
+    }).catch(e => {
+        console.error(`[${site_name}] Error in snapshotting news`, e);
+        return false;
+    });
+    await browser.close();
+  }
 })
 
 
