@@ -34,12 +34,12 @@ route.get('/api/movies/:id', (req,res) =>{
               status: 200,
               dataSet: img
           })
-      }).catch(e => {
-          console.error(`[${site_name}] Error in snapshotting news`, e);
-          return false;
+      }).catch(err => {
+        console.log(err);
+        res.sendStatus(500);
       });
       await browser.close();
-    }
+      }
 })
 
 route.post('/api/movies', (req,res) => {
