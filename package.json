@@ -12,6 +12,7 @@
     "@hapi/joi": "^17.1.1",
     "debug": "4.1.1",
     "express": "^4.17.1",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "puppeteer": "^3.0.4"
   }
 }
