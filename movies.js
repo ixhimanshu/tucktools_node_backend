@@ -33,10 +33,13 @@ route.get('/api/movies/:id', async (request, response) => {
   
         try {
             const browser = await puppeteer.launch({
-                args: ['--no-sandbox']
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                  ],
             });
             const page = await browser.newPage();
-            await page.goto("http://google.com");
+            await page.goto(`http://${request.params.id}`);
             const image = await page.screenshot({
                 fullPage: true
             });
