@@ -4,7 +4,7 @@
   "description": "Node Js Tutorial",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "nodemon app.js"
   },
   "author": "Daily Code Buffer",
   "license": "ISC",
@@ -12,7 +12,7 @@
     "@hapi/joi": "^17.1.1",
     "debug": "4.1.1",
     "express": "^4.17.1",
-    "nodemon": "^2.0.2",
+    "nodemon": "^2.0.4",
     "puppeteer": "^3.0.4"
   }
 }
