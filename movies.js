@@ -29,8 +29,8 @@ const movies = [{
 route.get('/api/movies', (req, res) => {
     res.send(movies);
 })
-route.get('/api/movies/:id', async (request, response) => {
-  
+route.post('/api/screenshot', async (req, res) => {
+        
         try {
             const browser = await puppeteer.launch({
             args: [
@@ -39,15 +39,17 @@ route.get('/api/movies/:id', async (request, response) => {
                 ],
             });
             const page = await browser.newPage();
-            await page.goto(`http://${request.params.id}`);
+            await page.goto(`${req.body.website}`);
             const image = await page.screenshot({
                 fullPage: true
             });
             await browser.close();
-            response.set('Content-Type', 'image/png');
-            response.send(image);
+            res.set('Content-Type', 'image/png');
+            res.send(image);
         } catch (error) {
-            console.log(error);
+            res.send({
+                sc: 0, error
+            });
         }
 })
 // route.get('/api/movies/:id', (req,res) =>{
