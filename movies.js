@@ -33,6 +33,30 @@ route.post('/api/twitter', (req,res) => {
   }
 )
 
+route.post('/api/twitter/trending-hashtags', (req,res) => {
+  let config = {
+    headers: {
+      'Authorization': 'Bearer ' + reqToken
+    }
+  }
+  let countryId = req.body.countryId
+
+  axios.get(`https://api.twitter.com/1.1/trends/place.json?id=${countryId}`, config)
+    .then(data => {
+      res.status(200).send({
+        sc: 1,
+        data: data.data[0]
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 2,
+        data: error
+      });
+    })
+  }
+)
+
 
 
 
