@@ -2,10 +2,46 @@ const express = require('express');
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+const TikTokScraper = require('tiktok-scraper');
 const reqToken = 'AAAAAAAAAAAAAAAAAAAAAKt9EQEAAAAA%2B1rwbmpXwSkxSLPTQFa5An9FxAs%3DVxvx2aYJEEI4l5sDNyHMtHa1rdlwpAtRHCdqhSMP16fzVHES4H';
 
 
 const route = express.Router();
+
+
+route.post('/api/tiktok/trend', (req,res) => {
+  const category = req.body.category;
+  (async () => {
+    try {
+        const posts = await TikTokScraper.trend(category, { 
+            number: 100,
+            sessionList: ['sid_tt=58ba9e34431774703d3c34e60d584475;'] 
+        });
+        res.status(200).send({
+          trends: posts
+        })
+    } catch (error) {
+      res.status(400).send({
+        err: error
+      })
+    }
+    })();
+  
+  }
+)
+
+route.post('/api/tiktok/user', (req,res) => {
+  (async () => {
+    try {
+        const hashtag = await TikTokScraper.getHashtagInfo('love');
+        console.log(hashtag);
+    } catch (error) {
+        console.log(error);
+    }
+})();
+  
+  }
+)
 
 
 
