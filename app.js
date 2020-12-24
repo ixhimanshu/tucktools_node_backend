@@ -5,7 +5,7 @@ const movies = require('./movies');
 
 
 const corsOptions = {
-    origin: 'https://tucktools.com',
+    origin: 'https://www.tucktools.com',
     optionsSuccessStatus: 200
   }
 
