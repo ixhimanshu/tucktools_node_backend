@@ -11,6 +11,13 @@ const corsOptions = {
 
 app.use(express.json());
 
+app.use('/v1', movies);
+
+
+app.get('/',(req,res) => {
+    res.send('Welcome to Tucktools.com!');
+})
+
 app.use('/v1', cors(corsOptions), movies);
 
 
