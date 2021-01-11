@@ -11,15 +11,17 @@ const route = express.Router();
 
 route.post('/api/tiktok/trend', (req,res) => {
   const category = req.body.category;
+  const qty = req.body.qty;
+
   (async () => {
     try {
         const posts = await TikTokScraper.trend(category, { 
-            number: 100,
-            sessionList: ['sid_tt=58ba9e34431774703d3c34e60d584475;'] 
+            number: qty
         });
         res.status(200).send({
           trends: posts
         })
+        console.log(posts);
     } catch (error) {
       res.status(400).send({
         err: error

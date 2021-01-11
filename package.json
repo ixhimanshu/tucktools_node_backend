@@ -19,7 +19,7 @@
     "nodemon": "^2.0.4",
     "puppeteer": "^3.0.4",
     "request": "^2.88.2",
-    "tiktok-scraper": "1.4.9",
+    "tiktok-scraper": "1.4.12",
     "translatte": "^2.5.8"
   }
 }
