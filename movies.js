@@ -33,9 +33,10 @@ route.post('/api/tiktok/trend', (req,res) => {
 )
 
 route.post('/api/tiktok/user', (req,res) => {
+  const user = req.body.user;
   (async () => {
     try {
-        const hashtag = await TikTokScraper.getUserProfileInfo('jlo');
+        const hashtag = await TikTokScraper.getUserProfileInfo(user);
         console.log(hashtag);
         res.status(200).send({
           trends: hashtag
