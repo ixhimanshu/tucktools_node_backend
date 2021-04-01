@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors')
 const app = express();
 const movies = require('./movies');
 
@@ -9,14 +8,17 @@ const corsOptions = {
     optionsSuccessStatus: 200
   }
 
-app.use(express.json());
-
-app.use('/v1', cors(corsOptions), movies);
+  app.use(express.json());
 
 
-app.get('/',cors(corsOptions), (req,res) => {
-    res.send('Welcome to Tucktools.com!');
+app.get('/', (req,res) => {
+  res.send('Welcome to Tucktools.com!');
 })
+
+
+app.use('/v1', movies);
+
+
 
 
 

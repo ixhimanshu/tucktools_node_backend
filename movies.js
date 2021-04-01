@@ -52,6 +52,70 @@ route.post('/api/tiktok/user', (req,res) => {
   }
 )
 
+// route.post('/api/tiktok/user', (req,res) => {
+//   let user = req.body.user
+
+//   axios.get(`https://api.tiktokcounter.com/?type=stats&username=${user}`)
+//     .then(data => {
+//       console.log(data);
+//       res.status(200).send({
+//         sc: 1,
+//         data: data.data
+//       });
+//     })
+//     .catch(error => {
+//       res.status(400).send({
+//         sc: 2,
+//         data: error
+//       });
+//     })
+//   }
+// )
+
+route.post('/api/instagram', (req,res) => {
+  let user = req.body.user
+
+  axios.get(`https://www.picuki.com/profile/${user}`)
+    .then(data => {
+      let ref = data.data.slice(data.data.indexOf('data-followers='), data.data.indexOf('class=\"followed_by'));
+      let dp = data.data.slice(data.data.indexOf('profile-hd-link') + 51, data.data.indexOf('data-post-type') - 2);
+      var numberPattern = /\d+/g;
+      res.status(200).send({
+        sc: 1,
+        followers: ref.match(numberPattern),
+        dp: dp,
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 2,
+        data: error
+      });
+    })
+  }
+)
+
+route.post('/api/instagram2', (req,res) => {
+  let user = req.body.user
+
+  axios.get(`https://www.instagram.com/${user}/?__a=1`)
+    .then(data => {
+      // let ref = data.data.slice(data.data.indexOf('data-followers='), data.data.indexOf('class=\"followed_by'));
+      // let dp = data.data.slice(data.data.indexOf('profile-hd-link') + 51, data.data.indexOf('data-post-type') - 2);
+      // var numberPattern = /\d+/g;
+      res.status(200).send({
+        sc: 1,
+        data: data.data
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 2,
+        data: error
+      });
+    })
+  }
+)
 
 
 route.post('/api/twitter', (req,res) => {
