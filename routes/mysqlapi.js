@@ -9,13 +9,13 @@ const db = mysql.createConnection({
     database : 'nodemysql'
   });
   
-  db.connect((err) => {
-    if(err){
-      throw err
-    } else {
-      console.log('connected...');
-    }
-  })
+  // db.connect((err) => {
+  //   if(err){
+  //     throw err
+  //   } else {
+  //     console.log('connected...');
+  //   }
+  // })
 
 // MYSQL QUERIES
 

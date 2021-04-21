@@ -4,10 +4,10 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const TikTokScraper = require('tiktok-scraper');
 const reqToken = 'AAAAAAAAAAAAAAAAAAAAAKt9EQEAAAAA%2B1rwbmpXwSkxSLPTQFa5An9FxAs%3DVxvx2aYJEEI4l5sDNyHMtHa1rdlwpAtRHCdqhSMP16fzVHES4H';
-
+// const functions = require('firebase-functions');
+const playwright = require('playwright');
 
 const route = express.Router();
-
 
 
 
@@ -39,8 +39,8 @@ route.post('/api/tiktok/user', (req,res) => {
   const user = req.body.user;
   (async () => {
     try {
-        const hashtag = await TikTokScraper.getUserProfileInfo(user);
-        console.log(hashtag);
+      const user = await TikTokScraper.getUserProfileInfo('jlo');
+      console.log(user);
         res.status(200).send({
           trends: hashtag
         })
@@ -120,6 +120,60 @@ route.post('/api/instagram2', (req,res) => {
   }
 )
 
+route.post('/api/instagram3', async (req,res) => {
+  try {
+    const browser = await playwright['webkit'].launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://www.instagram.com/accounts/login/');
+
+    await page.waitForSelector('[type=submit]', {
+      state: 'visible',
+    });
+
+    await page.type('[name=username]', 'tucktools'); // ->
+    await page.type('[type="password"]', 'Shivani@123'); // ->
+
+    await page.click('[type=submit]');
+    await page.waitForSelector('[placeholder=Search]', { state: 'visible' });
+    await page.goto(`https://www.instagram.com/${req.body.user}`); // ->
+
+    // Execute code in the DOM
+    const details = await page.evaluate(() => {
+      const resObj = {
+        posts: 0,
+        followers: 0,
+        following: 0,
+        dp: ''
+      };
+      const images = document.querySelectorAll('#react-root section main div header section ul li');
+      images.forEach((e,index) => {
+        if(index == 0) {
+          resObj.posts = e.querySelector('span').innerText.slice(0, -6);;
+        } else if(index == 1) {
+          resObj.followers = e.querySelector('a span').getAttribute('title');
+        } else{
+          resObj.following = e.querySelector('a span').innerText;
+        }
+      })
+      resObj.dp = document.querySelector('#react-root section main div header div div span img').getAttribute('src');
+      return resObj;
+    });
+    await browser.close();
+    return res.status(200).json({
+      details
+    });
+    
+  } catch (error) {
+    console.log(error);
+    res.send({
+      sc: 0,
+      error: error
+    });
+  }
+
+})
+
 
 route.post('/api/twitter', (req,res) => {
   let config = {
@@ -170,8 +224,6 @@ route.post('/api/twitter/trending-hashtags', (req,res) => {
 )
 
 
-
-
 route.post('/api/linkedin', async (req, res) => {
   // console.log(req.body.username);
   let url = req.body.url
@@ -195,10 +247,6 @@ route.post('/api/linkedin', async (req, res) => {
 
 
 })
-
-
-
-
 
 route.post('/api/scrap', async (req, res) => {
   console.log(req.body.website);
@@ -276,14 +324,8 @@ route.post('/api/scrap', async (req, res) => {
 
 route.get('/api/email', (req, res) => {
 
-  translatte('Do you speak Russian?', {
-    to: 'hi'
-  }).then(response => {
-    console.log(response);
-    // res.send('hi');
-    if (response) {
-
-
+  (async () => {
+    try {
       var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -294,9 +336,9 @@ route.get('/api/email', (req, res) => {
 
       var mailOptions = {
         from: 'jokeserotica@gmail.com',
-        to: 'himanshu011196.netscape@blogger.com',
+        to: 'thetucktools@gmail.com',
         subject: 'Sending Email using Node.js',
-        text: response.text
+        text: 'testing'
       };
 
       transporter.sendMail(mailOptions, function (error, info) {
@@ -305,25 +347,17 @@ route.get('/api/email', (req, res) => {
         } else {
           res.status(200).send({
             sc: 1,
-            data: response.text
+            data: 'success'
           });
         }
       });
-
-
-
-
-
-
-
-
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+          err: error
+        })
     }
-  }).catch(err => {
-    console.log(err);
-  });
-
-
-
+  })();
 })
 
 
