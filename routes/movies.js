@@ -3,14 +3,80 @@ const axios = require('axios');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const TikTokScraper = require('tiktok-scraper');
+const nodemailer = require('nodemailer');
 const reqToken = 'AAAAAAAAAAAAAAAAAAAAAKt9EQEAAAAA%2B1rwbmpXwSkxSLPTQFa5An9FxAs%3DVxvx2aYJEEI4l5sDNyHMtHa1rdlwpAtRHCdqhSMP16fzVHES4H';
 // const functions = require('firebase-functions');
-const playwright = require('playwright');
+const request = require('request');
 
 const route = express.Router();
 
 
+const options = {
+  // Number of posts to scrape: {int default: 20}
+  number: 50,
+  
+  // Set session: {string[] default: ['']}
+  // Authenticated session cookie value is required to scrape user/trending/music/hashtag feed
+  // You can put here any number of sessions, each request will select random session from the list
+  sessionList: ['sid_tt=21312213'],
 
+  // Set proxy {string[] | string default: ''}
+  // http proxy: 127.0.0.1:8080
+  // socks proxy: socks5://127.0.0.1:8080
+  // You can pass proxies as an array and scraper will randomly select a proxy from the array to execute the requests
+  proxy: '',
+
+  // Set to {true} to search by user id: {boolean default: false}
+  by_user_id: false,
+
+  // How many post should be downloaded asynchronously. Only if {download:true}: {int default: 5}
+  asyncDownload: 5,
+
+  // How many post should be scraped asynchronously: {int default: 3}
+  // Current option will be applied only with current types: music and hashtag
+  // With other types it is always 1 because every request response to the TikTok API is providing the "maxCursor" value
+  // that is required to send the next request
+  asyncScraping: 3,
+
+  // File path where all files will be saved: {string default: 'CURRENT_DIR'}
+  filepath: `CURRENT_DIR`,
+
+  // Custom file name for the output files: {string default: ''}
+  fileName: `CURRENT_DIR`,
+
+  // Output with information can be saved to a CSV or JSON files: {string default: 'na'}
+  // 'csv' to save in csv
+  // 'json' to save in json
+  // 'all' to save in json and csv
+  // 'na' to skip this step
+  filetype: `na`,
+
+  // Set custom headers: user-agent, cookie and etc
+  // NOTE: When you parse video feed or single video metadata then in return you will receive {headers} object
+  // that was used to extract the information and in order to access and download video through received {videoUrl} value you need to use same headers
+  headers: {
+      'user-agent': "Mozilla%2F5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML,+like+Gecko)+Chrome%2F89.0.4389.128+Safari%2F537.36",
+      referer: 'https://www.tiktok.com/',
+      cookie: `tt_webid_v2=68dssds`,
+      app_name: 'tiktok_web',
+      _signature: '_02B4Z6wo00101iZpO8gAAIDA-i1GuDfk4MYmaT9AAOkp1d'
+  },
+  
+  // Download video without the watermark: {boolean default: false}
+  // Set to true to download without the watermark
+  // This option will affect the execution speed
+  noWaterMark: false,
+  
+  // Create link to HD video: {boolean default: false}
+  // This option will only work if {noWaterMark} is set to {true}
+  hdVideo: false,
+
+  // verifyFp is used to verify the request and avoid captcha
+  // When you are using proxy then there are high chances that the request will be 
+  // blocked with captcha
+  // You can set your own verifyFp value or default(hardcoded) will be used
+  verifyFp: ''
+};
 
 route.post('/api/tiktok/trend', (req,res) => {
   const category = req.body.category;
@@ -39,8 +105,8 @@ route.post('/api/tiktok/user', (req,res) => {
   const user = req.body.user;
   (async () => {
     try {
-      const user = await TikTokScraper.getUserProfileInfo('jlo');
-      console.log(user);
+      const user = await TikTokScraper.getUserProfileInfo('lorangray', options);
+      console.log(req.body.user);
         res.status(200).send({
           trends: hashtag
         })
@@ -55,25 +121,46 @@ route.post('/api/tiktok/user', (req,res) => {
   }
 )
 
-// route.post('/api/tiktok/user', (req,res) => {
-//   let user = req.body.user
+route.post('/api/tiktok2', (req,res) => {
+  let user = req.body.user
 
-//   axios.get(`https://api.tiktokcounter.com/?type=stats&username=${user}`)
-//     .then(data => {
-//       console.log(data);
-//       res.status(200).send({
-//         sc: 1,
-//         data: data.data
-//       });
-//     })
-//     .catch(error => {
-//       res.status(400).send({
-//         sc: 2,
-//         data: error
-//       });
-//     })
-//   }
-// )
+  axios.get(`https://api.tiktokcounter.com/?type=history&username=${user}`)
+    .then(data => {
+      res.status(200).send({
+        sc: 1,
+        data: data.data.data
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 2,
+        data: error
+      });
+    })
+  }
+)
+
+route.post('/api/tiktok2/dp', (req,res) => {
+
+  let user = req.body.user
+  request(`https://brainans.com/user/jlo`, async function (error, response, html) {
+    if (!error && response.statusCode == 200) {
+      var $ = cheerio.load(html);
+      let dp = $(".user__img").attr('style');
+      res.status(200).send({
+        sc: 1,
+        data: dp
+      });
+   
+    } else {
+      res.status(400).send({
+        sc: 0,
+        data: error.error
+      });
+    }
+  });
+})
+
 
 route.post('/api/instagram', (req,res) => {
   let user = req.body.user
@@ -85,8 +172,9 @@ route.post('/api/instagram', (req,res) => {
       var numberPattern = /\d+/g;
       res.status(200).send({
         sc: 1,
+        // data: data.data,
         followers: ref.match(numberPattern),
-        dp: dp,
+        dp: "https://www.picuki.com" + dp,
       });
     })
     .catch(error => {
@@ -171,6 +259,57 @@ route.post('/api/instagram3', async (req,res) => {
       error: error
     });
   }
+
+})
+
+route.post('/api/instagram4', (req,res) => {
+  let user = req.body.user
+  const data = {"signed_body":"c2e102532a040b4e4cbcb4be521098b948c75ff587d9b4f93540a42ffbfc1375.{\"ins_account\":\"tuck\",\"system_id\":2}",
+  "sign_version":1}
+  axios.post(`https://www.insfollowup.com/api/ins/getaccountbyusername`, JSON.parse(JSON.stringify(data).replace('tuck', user)))
+    .then(data => {
+      res.status(200).send({
+        sc: 1,
+        data: data.data
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 2,
+        data: error
+      });
+    })
+  }
+)
+
+route.post('/api/image', async (req,res) => {
+  let url = req.body.url
+
+  axios.get(url)
+    .then(data => {
+      var $ = cheerio.load(data.data);
+     
+      const list = [];
+      $('img').each(function (index, element) {
+         const a = $(element).attr('src');
+         if(a.indexOf('./') > -1) {
+          list.push(a.slice(a.lastIndexOf('./'), a.length).replace('.', url))
+         } else {
+           list.push(a)
+         }
+      });
+      // console.log(title);
+      res.status(200).send({
+        sc: 1,
+        link: list
+      });
+    })
+    .catch(error => {
+      res.status(400).send({
+        sc: 0,
+        data: error
+      });
+    })
 
 })
 
@@ -322,7 +461,7 @@ route.post('/api/scrap', async (req, res) => {
 
 })
 
-route.get('/api/email', (req, res) => {
+route.post('/api/email', (req, res) => {
 
   (async () => {
     try {
@@ -336,9 +475,9 @@ route.get('/api/email', (req, res) => {
 
       var mailOptions = {
         from: 'jokeserotica@gmail.com',
-        to: 'thetucktools@gmail.com',
-        subject: 'Sending Email using Node.js',
-        text: 'testing'
+        to: 'himanshuthakur.cse.iimtgn@gmail.com',
+        subject: `${req.body.review} : ${req.body.tool}`,
+        text: JSON.stringify(req.body)
       };
 
       transporter.sendMail(mailOptions, function (error, info) {
